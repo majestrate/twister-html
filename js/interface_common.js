@@ -6,6 +6,8 @@
 // Post actions: submit, count characters
 
 var window_scrollY = 0;
+var _watchHashChangeDontLoadModal = false;
+var _minimizedModals = {};
 
 function openModal(modal) {
     if (!modal.classBase) {
@@ -65,9 +67,89 @@ function closeModalHandler(classBase) {
     modalWindows.fadeOut('fast', function() {modalWindows.remove();});
 }
 
+function minimizeModal(modal, switchMode) {
+    function minimize(modal, scroll) {
+        modal.detach();
+
+        btnResume = $('<li>' + modal.find('.modal-header h3').text() + '</li>')
+            .on('click', {hashString: window.location.hash}, resumeModal)
+            .appendTo($('#modals-minimized'))
+        ;
+
+        _minimizedModals[window.location.hash] = {
+            self: modal,
+            scroll: scroll,
+            btnResume: btnResume
+        };
+    }
+
+    var scroll;  // MUST be setted before modal.detach(), modal.fadeOut() and so on
+    if (modal.is('.directMessages') || modal.is('.group-messages-new-group')
+        || modal.is('.group-messages-join-group')) {
+            scroll = {
+                targetSelector: '.modal-content',
+                top: modal.find('.modal-content').scrollTop()
+            };
+    } else if (modal.is('.profile-modal')) {
+        if (modal.find('.profile-card').attr('data-screen-name')[0] === '*')
+            scroll = {
+                targetSelector: '.modal-content .members',
+                top: modal.find('.modal-content .members').scrollTop()
+            };
+        else
+            scroll = {
+                targetSelector: '.modal-content .postboard-posts',
+                top: modal.find('.modal-content .postboard-posts').scrollTop()
+            };
+    }
+
+    if (switchMode)
+        minimize(modal, scroll);
+    else
+        modal.fadeOut('fast', function () {
+            minimize(modal, scroll);
+
+            window.location.hash = '#';
+            window.scroll(window.pageXOffset, window_scrollY);
+            $('body').css({
+                'overflow': 'auto',
+                'margin-right': '0'
+            });
+        });
+}
+
+function resumeModal(event) {
+    var elemEvent = $(event.target);
+    elemEvent.fadeOut('fast', function () {elemEvent.remove();});
+
+    var modalActive = $('.modal-wrapper:not(#templates *)');
+    if (modalActive.length)
+        minimizeModal(modalActive, true);
+    else {
+        window_scrollY = window.pageYOffset;
+        $('body').css('overflow', 'hidden');
+    }
+
+    var modal = _minimizedModals[event.data.hashString];
+    if (modal) {
+        _minimizedModals[event.data.hashString] = undefined;
+        _watchHashChangeDontLoadModal = true;
+        window.location.hash = event.data.hashString;
+        modal.self.prependTo('body').fadeIn('fast', function () {
+            // TODO also need reset modal height here maybe and then compute new scroll
+            if (modal.scroll)
+                modal.self.find($(modal.scroll.targetSelector).scrollTop(modal.scroll.top));
+        });
+    }
+}
+
 function confirmPopup(event, req) {
-    if (event && event.stopPropagation)
+    if (event && event.stopPropagation) {
         event.stopPropagation();
+
+        if (!req && event.data)
+            req = event.data;
+    }
 
     var modal = openModal({
         classBase: '.prompt-wrapper',
@@ -77,7 +159,7 @@ function confirmPopup(event, req) {
     });
 
     if (req.messageTxt)
-        modal.content.find('.message').text(req.messageTxt);
+        modal.content.find('.message').html(htmlFormatMsg(req.messageTxt, {markout: 'apply'}).html);
 
     var btn = modal.content.find('.confirm');
     if (req.removeConfirm)
@@ -137,7 +219,7 @@ function checkNetworkStatusAndAskRedirect(cbFunc, cbArg) {
     networkUpdate(function(args) {
         if (!twisterdConnectedAndUptodate) {
             confirmPopup(null, {
-                messageTxt: polyglot.t('switch_to_network'),
+                messageTxt: polyglot.t('confirm_switch_to_network', {page: '/network.html'}),
                 confirmFunc: $.MAL.goNetwork
             });
         } else {
@@ -425,6 +507,7 @@ function watchHashChange(e) {
         var prevurlsplit = e.oldURL.split('#');
         var prevhashstring = prevurlsplit[1];
 
+        // FIXME need to move back button handling to special function and call it in openModal() and resumeModal()
         var notFirstModalView = (prevhashstring !== undefined && prevhashstring.length > 0);
         var notNavigatedBackToFirstModalView = (window.history.state == null ||
             (window.history.state != null && window.history.state.showCloseButton !== false));
@@ -437,10 +520,21 @@ function watchHashChange(e) {
         }
     }
 
-    loadModalFromHash();
+    if (_watchHashChangeDontLoadModal)
+        _watchHashChangeDontLoadModal = false;
+    else
+        loadModalFromHash();
 }
 
 function loadModalFromHash() {
+    if (_minimizedModals[window.location.hash]) {
+        // need to remove active modal before btnResume.click() or it will be minimized in resumeModal()
+        // e.g. for case when you click on profile link in some modal having this profile's modal minimized already
+        $('.modal-wrapper:not(#templates *)').remove();
+        _minimizedModals[window.location.hash].btnResume.click();
+        return;
+    }
+
     var hashstring = decodeURIComponent(window.location.hash);
     var hashdata = hashstring.split(':');
 
@@ -1526,11 +1620,13 @@ function replaceDashboards() {
         $('.userMenu').addClass('w1200');
         $('.module.who-to-follow').detach().appendTo($('.dashboard.right'));
         $('.module.twistday-reminder').detach().appendTo($('.dashboard.right'));
+        $('#modals-minimized').addClass('w1200');
     } else if (width < 1200 && wrapper.hasClass('w1200')) {
         wrapper.removeClass('w1200');
         $('.userMenu').removeClass('w1200');
         $('.module.who-to-follow').detach().insertAfter($('.module.mini-profile'));
         $('.module.twistday-reminder').detach().insertAfter($('.module.toptrends'));
+        $('#modals-minimized').removeClass('w1200');
     }
 }
 
@@ -1541,6 +1637,10 @@ function initInterfaceCommon() {
         $('.modal-back').css('display', 'none');
         $('.mark-all-as-read').css('display', 'none');
         closeModal();
+    });
+
+    $('.minimize-modal').on('click', function (event) {
+        minimizeModal($(event.target).closest('.modal-wrapper'));
     });
 
     $('.modal-back').on('click', function() {history.back();});
