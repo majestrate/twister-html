@@ -6,7 +6,7 @@
 // Post actions: submit, count characters
 
 var window_scrollY = 0;
-var _watchHashChangeDontLoadModal = false;
+var _watchHashChangeRelaxDontDoIt = window.location.hash === '' ? true : false;
 var _minimizedModals = {};
 
 function openModal(modal) {
@@ -49,7 +49,10 @@ function openModal(modal) {
 function closeModal() {
     closeModalHandler('.modal-wrapper');
 
-    window.location.hash = '#';
+    if (window.location.hash !== '') {
+        _watchHashChangeRelaxDontDoIt = true;
+        window.location.hash = '#';
+    }
     window.scroll(window.pageXOffset, window_scrollY);
     $('body').css({
         'overflow': 'auto',
@@ -109,6 +112,7 @@ function minimizeModal(modal, switchMode) {
         modal.fadeOut('fast', function () {
             minimize(modal, scroll);
 
+            _watchHashChangeRelaxDontDoIt = true;
             window.location.hash = '#';
             window.scroll(window.pageXOffset, window_scrollY);
             $('body').css({
@@ -133,8 +137,10 @@ function resumeModal(event) {
     var modal = _minimizedModals[event.data.hashString];
     if (modal) {
         _minimizedModals[event.data.hashString] = undefined;
-        _watchHashChangeDontLoadModal = true;
-        window.location.hash = event.data.hashString;
+        if (window.location.hash !== event.data.hashString) {
+            _watchHashChangeRelaxDontDoIt = true;
+            window.location.hash = event.data.hashString;
+        }
         modal.self.prependTo('body').fadeIn('fast', function () {
             // TODO also need reset modal height here maybe and then compute new scroll
             if (modal.scroll)
@@ -148,7 +154,8 @@ function resumeModal(event) {
 
 function focusModalWithElement(elem, cbFunc, cbArg) {
     if (elem.jquery ? elem.is('html *') : $(elem).is('html *')) {
-        cbFunc(cbArg);
+        if (typeof cbFunc === 'function')
+            cbFunc(cbArg);
         return true;
     }
 
@@ -556,13 +563,13 @@ function watchHashChange(e) {
         if (notFirstModalView && notNavigatedBackToFirstModalView) {
             $('.modal-back').css('display', 'inline');
         } else {
-            window.history.pushState({showCloseButton: false}, null, null);
+            window.history.replaceState({showCloseButton: false}, '', window.location.pathname + window.location.hash);
             $('.modal-back').css('display', 'none');
         }
     }
 
-    if (_watchHashChangeDontLoadModal)
-        _watchHashChangeDontLoadModal = false;
+    if (_watchHashChangeRelaxDontDoIt)
+        _watchHashChangeRelaxDontDoIt = false;
     else
         loadModalFromHash();
 }
@@ -577,6 +584,10 @@ function loadModalFromHash() {
     }
 
     var hashstring = decodeURIComponent(window.location.hash);
+    if (hashstring === '') {
+        closeModal();
+        return;
+    }
     var hashdata = hashstring.split(':');
 
     if (hashdata[0] !== '#web+twister')
@@ -1570,9 +1581,8 @@ function postSubmit(e, oldLastPostId) {
 
         $(textArea[0]).remove();
 
-        oldLastPostId = lastPostId;
         doSubmitPost(postText, postData);
-        setTimeout(postSubmit, 1000, btnPostSubmit, oldLastPostId);
+        setTimeout(postSubmit, 1000, btnPostSubmit, lastPostId);
 
         return;
     }
@@ -1581,9 +1591,7 @@ function postSubmit(e, oldLastPostId) {
         closePrompt();
     else {
         textArea.val('').attr('placeholder', polyglot.t('Your message was sent!'));
-        var tweetForm = btnPostSubmit.closest('form');
-        var remainingCount = tweetForm.find('.post-area-remaining');
-        remainingCount.text(140);
+        btnPostSubmit.closest('form').find('.post-area-remaining').text('140');
 
         if (btnPostSubmit.closest('.post-area,.post-reply-content')) {
             $('.post-area-new').removeClass('open').find('textarea').blur();

@@ -23,11 +23,11 @@ function formatDecimal(value) {
     return Math.round(value * scale) / scale;
 }
 function formatSize(value) {
-    if (value<1024) return value + ' b';
-    if (value<1024*1024) return formatDecimal(value/1024) + ' Kb';
-    if (value<1024*1024*1024) return formatDecimal(value/(1024*1024)) + ' Mb';
-    if (value<1024*1024*1024*1024) return formatDecimal(value/(1024*1024*1024)) + ' Gb';
-    return formatDecimal(value/(1024*1024*1024*1024)) + ' Tb';
+    if (value<1024) return value + ' B';
+    if (value<1024*1024) return formatDecimal(value/1024) + ' KB';
+    if (value<1024*1024*1024) return formatDecimal(value/(1024*1024)) + ' MB';
+    if (value<1024*1024*1024*1024) return formatDecimal(value/(1024*1024*1024)) + ' GB';
+    return formatDecimal(value/(1024*1024*1024*1024)) + ' TB';
 }
 function formatSpeed(total, rate) {
     return formatSize(total) + ' @ ' + formatSize(rate) + '/s'
@@ -52,6 +52,20 @@ function requestNetInfo(cbFunc, cbArg) {
                    $(".dht-nodes").text(twisterDhtNodes);
                    $(".userMenu-dhtindicator a").text(twisterDhtNodes);
                    $(".version").text(twisterDisplayVersion);
+
+                   if( ret.proxy !== undefined && ret.proxy.length ) {
+                       $(".proxy").text(ret.proxy);
+                       $(".using-proxy").show();
+                       $(".not-using-proxy").hide();
+                   } else {
+                       $(".ext-ip").text(ret.ext_addr_net1);
+                       $(".ext-port1").text(ret.ext_port1);
+                       $(".ext-port2").text(ret.ext_port2);
+                       $(".test-ext-port1").attr("href","http://www.yougetsignal.com/tools/open-ports/?port=" + ret.ext_port1);
+                       $(".test-ext-port2").attr("href","http://www.yougetsignal.com/tools/open-ports/?port=" + ret.ext_port2);
+                       $(".using-proxy").hide();
+                       $(".not-using-proxy").show();
+                   }
 
                    $(".dht-torrents").text(ret.dht_torrents);
                    $(".num-peers").text(ret.num_peers);
