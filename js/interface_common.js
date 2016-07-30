@@ -7,10 +7,11 @@
 
 var twister = {
     URIs: {},  // shortened URIs are cached here after fetching
+    torrentIds: {},  // auto-download torrentIds
     focus: {},  // focused elements are counted here
     html: {
         detached: $('<div>'),  // here elements go to detach themself
-        blanka: $('<a target="_blank">')  // to open stuff in new tab, see routeOnClick()
+        blanka: $('<a rel="nofollow noreferrer" target="_blank">')  // to open stuff in new tab, see routeOnClick()
     },
     tmpl: {  // templates pointers are stored here
         root: $('<div>')  // templates should be detached from DOM and attached here; use extractTemplate()
@@ -24,12 +25,18 @@ var _watchHashChangeRelaxDontDoIt = window.location.hash === '' ? true : false;
 // and actually I'm talking about 'so called \'detached\'' elements which appended to twister.html.detached
 // we may just append twister.html.detached to document instead and remove this weird shit (or I need to
 // improve my google skills to find native jQuery way to dig through all detached elemets with one query)
-function getElem(req) {
+function getElem(req, searchInTmpl) {
     var elem = $(req);
     var h = twister.html.detached.find(req);
 
     for (var i = 0; i < h.length; i++)
         elem[elem.length++] = h[i];
+
+    if (searchInTmpl) {
+        h = twister.tmpl.root.find(req);
+        for (var i = 0; i < h.length; i++)
+            elem[elem.length++] = h[i];
+    }
 
     return elem;
 }
@@ -783,7 +790,12 @@ function addToCommonDMsList(list, targetAlias, message) {
         list.append(item);
 }
 
-function openConversationClick(event) {
+function handleClickOpenProfileModal(event) {
+    event.data = {route: $(this).attr('href')};
+    routeOnClick(event);
+}
+
+function handleClickOpenConversation(event) {
     event.preventDefault();
     event.stopPropagation();
 
@@ -822,7 +834,7 @@ function openRequestShortURIForm(event) {
         return;
     }
 
-    var uri = prompt('enter a link, watch yourself carefully');  // FIXME
+    var uri = prompt(polyglot.t('shorten_URI_enter_link'));  // FIXME replace native prompt
 
     if (event && event.data && typeof event.data.cbFunc === 'function')
         newShortURI(uri, event.data.cbFunc, event.data.cbReq);
@@ -854,7 +866,12 @@ function fillElemWithTxt(elem, txt, htmlFormatMsgOpt) {
     elem.find('a').each(function (i, elem) {
         var href = elem.getAttribute('href');
         if (elem.classList.contains('link-shortened')) {
-            $(elem).on('click mouseup', {preventDefault: true}, muteEvent);
+            $(elem).on('click mouseup', {href: href},
+                function (event) {
+                    muteEvent(event, true);
+                    fetchShortenedURI(event.data.href);
+                }
+            );
             fetchShortenedURI(href);
         } else if (href && href[0] === '#')
             $(elem)
@@ -868,7 +885,7 @@ function fillElemWithTxt(elem, txt, htmlFormatMsgOpt) {
     return formatted;
 }
 
-function fetchShortenedURI(req) {
+function fetchShortenedURI(req, attemptCount) {
     if (twister.URIs[req]) {
         applyShortenedURI(req, twister.URIs[req]);
         return;
@@ -877,26 +894,133 @@ function fetchShortenedURI(req) {
     decodeShortURI(req,
         function (req, ret) {
             if (ret) {
-                twister.URIs[req] = ret;
+                twister.URIs[req.shortURI] = ret;
                 $.localStorage.set('twistaURIs', twister.URIs);
-                applyShortenedURI(req, ret);
+                applyShortenedURI(req.shortURI, ret);
             } else {
-                console.warn('can\'t fetch URI "' + req + '": null response');
+                console.warn('can\'t fetch URI "' + req.shortURI + '": null response');
+                if ((req.attemptCount ? ++req.attemptCount : req.attemptCount = 1) < 3)  // < $.Options.decodeShortURITriesMax
+                    fetchShortenedURI(req.shortURI, req.attemptCount);
             }
-        }, req
+        }, {shortURI: req, attemptCount: attemptCount}
     );
 }
 
-function applyShortenedURI(short, long) {
+function applyShortenedURI(short, uriAndMimetype) {
+    var long = (uriAndMimetype instanceof Array) ? uriAndMimetype[0] : uriAndMimetype;
+    var mimetype = (uriAndMimetype instanceof Array) ? uriAndMimetype[1] : undefined;
     var elems = getElem('.link-shortened[href="' + short + '"]')
         .attr('href', long)
         .removeClass('link-shortened')
         .off('click mouseup')
         .on('click mouseup', muteEvent)
     ;
-    for (var i = 0; i < elems.length; i++)
+    var cropped = (/*$.Options.cropLongURIs &&*/ long.length > 23) ? long.slice(0, 23) + '…' : undefined;
+    for (var i = 0; i < elems.length; i++) {
         if (elems[i].text === short)  // there may be some other text, possibly formatted, so we check it
-            elems[i].text = long;
+            if (cropped)
+                $(elems[i])
+                    .text(cropped)
+                    .on('mouseover', {uri: long}, function (event) {event.target.text = event.data.uri;})
+                    .on('mouseout', {uri: cropped}, function (event) {event.target.text = event.data.uri;})
+                ;
+            else
+                elems[i].text = long;
+
+        if (long.lastIndexOf('magnet:?xt=urn:btih:') === 0) {
+            var previewContainer = $(elems[i]).parents(".post-data").find(".preview-container");
+            var fromUser = $(elems[i]).parents(".post-data").attr("data-screen-name");
+            var isMedia = mimetype !== undefined &&
+                          (mimetype.lastIndexOf('video') === 0 ||
+                           mimetype.lastIndexOf('image') === 0 ||
+                           mimetype.lastIndexOf('audio') === 0);
+            if ($.Options.WebTorrent.val === 'enable') {
+                if ($.Options.WebTorrentAutoDownload.val === 'enable' &&
+                    followingUsers.indexOf(fromUser) !==-1) {
+                    if(!(long in twister.torrentIds)) {
+                        twister.torrentIds[long] = true;
+                        $.localStorage.set('torrentIds', twister.torrentIds);
+                    }
+                    startTorrentDownloadAndPreview(long, previewContainer, isMedia);
+                } else {
+                    // webtorrent enabled but no auto-download. provide a link to start manually.
+                    var startTorrentLink = $('<a href="#">Start WebTorrent download of this media</a>');
+                    startTorrentLink.on('click', function(event) {
+                        event.stopPropagation();
+                        startTorrentDownloadAndPreview(long, previewContainer, isMedia)
+                    });
+                    previewContainer.append(startTorrentLink);
+                }
+            } else {
+                var enableWebTorrentWarning = $('<span>' + 
+                    polyglot.t('Enable WebTorrent support in options page to display this content') +
+                    '</span>');
+                previewContainer.append(enableWebTorrentWarning);
+            }
+        }
+    }
+}
+
+function startTorrentDownloadAndPreview(torrentId, previewContainer, isMedia) {
+    if (typeof WebTorrentClient !== 'undefined') {
+        _startTorrentDownloadAndPreview(torrentId, previewContainer, isMedia);
+    } else {
+        // delay execution until WebTorrent is loaded/initialized
+        setTimeout(_startTorrentDownloadAndPreview,1000,torrentId, previewContainer, isMedia)
+    }
+}
+
+function _startTorrentDownloadAndPreview(torrentId, previewContainer, isMedia) {
+    var torrent = WebTorrentClient.get(torrentId);
+    if( torrent === null ) 
+        torrent = WebTorrentClient.add(torrentId);
+
+    previewContainer.empty();
+    var speedStatus = $('<span class="post-text"/>');
+    previewContainer.append(speedStatus);
+    function updateSpeed () {
+        var progress = (100 * torrent.progress).toFixed(1)
+        speedStatus[0].innerHTML =
+            '<b>Peers:</b> ' + torrent.numPeers + ' ' +
+            '<b>Progress:</b> ' + progress + '% ' +
+            '<b>Download:</b> ' + torrent.downloadSpeed + '/s ' +
+            '<b>Upload:</b> ' + torrent.uploadSpeed + '/s';
+    }
+    setInterval(updateSpeed, 1000);
+    updateSpeed();
+
+    if( torrent.files.length ) {
+        webtorrentFilePreview(torrent.files[0], previewContainer, isMedia)
+    } else {
+        torrent.on('metadata', function () {
+            webtorrentFilePreview(torrent.files[0], previewContainer, isMedia)
+        });
+    }
+}
+
+function webtorrentFilePreview(file, previewContainer, isMedia) {
+    if (!isMedia) {
+        // try guessing by filename extension
+        isMedia = /^[^?]+\.(?:jpe?g|gif|png|mp4|webm|mp3|ogg|wav|)$/i.test(file.name)
+    }
+    
+    if (isMedia) {
+        var imagePreview = $('<div class="image-preview" />');
+        previewContainer.append(imagePreview);
+        file.appendTo(imagePreview[0], function (err, elem) {
+            if ('pause' in elem) {
+                elem.pause();
+            }
+        });
+        imagePreview.find("video").removeAttr("autoplay");
+    } else {
+        file.getBlobURL(function (err, url) {
+            if (err) return console.error(err)
+            var blobLink = $('<a href="' + url + '" download="'+file.name+'">' +
+                'Download ' + file.name + '</a>');
+            previewContainer.append(blobLink);
+        })
+    }
 }
 
 function routeOnClick(event) {
@@ -925,8 +1049,8 @@ function routeOnClick(event) {
             routeNewTab(event);
         else {
             var modal = $(event.target).closest('.modal-wrapper:not(.closed)');
-            if (modal.length) {  // killer feature: we minimize current modal before .route opening
-                minimizeModal(modal, true);
+            if (modal.length && window.location.hash !== event.data.route) {
+                minimizeModal(modal, true);  // yep, we minimize current modal before .route opening
                 window.location.hash = event.data.route;
             } else
                 routeNewTab(event);
@@ -1359,7 +1483,7 @@ function composeNewPost(e, postAreaNew) {
     if (!postAreaNew.hasClass('open')) {
         postAreaNew.addClass('open');
         //se o usuário clicar fora é pra fechar
-        postAreaNew.clickoutside(unfocusThis);
+        postAreaNew.clickoutside(unfocusPostAreaNew);
 
         if ($.Options.splitPosts.val === 'enable')
             usePostSpliting = true;
@@ -1380,21 +1504,26 @@ function composeNewPost(e, postAreaNew) {
     var textArea = postAreaNew.find('textarea');
     if (textArea.attr('data-reply-to') && !textArea.val().length) {
         textArea.val(textArea.attr('data-reply-to'));
-        posPostPreview(textArea);
+        poseTextareaPostTools(textArea);
     }
     if (!postAreaNew.find('textarea:focus').length)
         postAreaNew.find('textarea:last').focus();
 }
 
-function posPostPreview(event) {
+function poseTextareaPostTools(event) {
+    if (event.jquery)
+        var textArea = event;
+    else
+        var textArea = $(event.target);
+
+    posePostPreview(textArea);
+    poseTextareaEditBar(textArea);
+}
+
+function posePostPreview(textArea) {
     if (!$.Options.postPreview.val)
         return;
 
-    if (event.jquery) {
-        var textArea = event;
-    } else {
-        var textArea = $(event.target);
-    }
     var postPreview = textArea.siblings('#post-preview');
     if (!postPreview.length) {
         postPreview = $('#post-preview-template').children().clone()
@@ -1412,10 +1541,23 @@ function posPostPreview(event) {
     textArea.before(postPreview);
 }
 
+function poseTextareaEditBar(textArea) {
+    var editBar = textArea.siblings('.post-textarea-edit-bar');
+    if (!editBar.length) {
+        editBar = twister.tmpl.postTextareaEditBar.clone(true)
+            .css('margin-left', textArea.css('margin-left'))
+            .css('margin-right', textArea.css('margin-right'))
+        ;
+        editBar.find('.shorten-uri').text(polyglot.t('shorten_URI'));
+    }
+    editBar.insertAfter(textArea).show();
+}
+
 // Reduz Área do Novo post
-function unfocusThis() {
-    $(this).removeClass('open')
-        .find('#post-preview').slideUp('fast');
+function unfocusPostAreaNew() {
+    var postAreaNew = $(this).removeClass('open');
+    postAreaNew.find('#post-preview').slideUp('fast');
+    postAreaNew.find('.post-textarea-edit-bar').hide();
 }
 
 function checkPostForMentions(post, mentions, max) {
@@ -1525,8 +1667,9 @@ function replyTextInput(event) {
     }
 
     function getPostSplitingPML() {
+        var MaxPostSize = $.Options.MaxPostEditorChars.val;
         if (splitedPostsCount > 1) {
-            var pml = 140 - (i+1).toString().length - splitedPostsCount.toString().length - 4;
+            var pml = MaxPostSize - (i+1).toString().length - splitedPostsCount.toString().length - 4;
 
             // if mention exists, we shouldn't add it while posting.
             if (typeof reply_to !== 'undefined' &&
@@ -1534,7 +1677,7 @@ function replyTextInput(event) {
                 pml -= reply_to.length;
             }
         } else
-            var pml = 140;
+            var pml = MaxPostSize;
         return pml;
     }
 
@@ -1581,7 +1724,8 @@ function replyTextUpdateRemaining(ta) {
                     return false;
                 }
             });
-            if (!disable && c >= 0 && c < 140 && textArea.val() !== textArea.attr('data-reply-to')) {
+            if (!disable && c >= 0 && c < $.Options.MaxPostEditorChars.val && 
+                 textArea.val() !== textArea.attr('data-reply-to')) {
                 remainingCount.removeClass('warn');
                 $.MAL.enableButton(buttonSend);
             } else {
@@ -1597,14 +1741,15 @@ function replyTextCountRemaining(ta) {
     var textArea = $(ta);
     var c;
 
+    var MaxPostSize = $.Options.MaxPostEditorChars.val;
     if (usePostSpliting && !textArea.closest('.directMessages').length && splitedPostsCount > 1) {
-        c = 140 - ta.value.length - (textArea.closest('form').find('textarea').index(ta) + 1).toString().length - splitedPostsCount.toString().length - 4;
+        c = MaxPostSize - ta.value.length - (textArea.closest('form').find('textarea').index(ta) + 1).toString().length - splitedPostsCount.toString().length - 4;
         var reply_to = textArea.attr('data-reply-to');
         if (typeof reply_to !== 'undefined' &&
-            !checkPostForMentions(ta.value, reply_to, 140 -c -reply_to.length))
+            !checkPostForMentions(ta.value, reply_to, MaxPostSize -c -reply_to.length))
                 c -= reply_to.length;
     } else
-        c = 140 - ta.value.length;
+        c = MaxPostSize - ta.value.length;
 
     return c;
 }
@@ -2069,7 +2214,7 @@ function postSubmit(e, oldLastPostId) {
             var postText = '';
             var reply_to = textArea.attr('data-reply-to');
             var val = textArea.val();
-            if (typeof reply_to === 'undefined' || checkPostForMentions(val, reply_to, 140))
+            if (typeof reply_to === 'undefined' || checkPostForMentions(val, reply_to, $.Options.MaxPostEditorChars.val))
                 postText = val + ' (' + splitedPostsCount.toString() + '/' + splitedPostsCount.toString() + ')';
             else
                 postText = reply_to + val + ' (' + splitedPostsCount.toString() + '/' + splitedPostsCount.toString() + ')';
@@ -2083,7 +2228,7 @@ function postSubmit(e, oldLastPostId) {
         var postText = '';
         var reply_to = textArea.attr('data-reply-to');
         var val = textArea[0].value;
-        if (typeof reply_to === 'undefined' || checkPostForMentions(val, reply_to, 140))
+        if (typeof reply_to === 'undefined' || checkPostForMentions(val, reply_to, $.Options.MaxPostEditorChars.val))
             postText = val + ' (' + (splitedPostsCount - textArea.length + 1).toString() + '/' + splitedPostsCount.toString() + ')';
         else
             postText = reply_to + val + ' (' + (splitedPostsCount - textArea.length + 1).toString() + '/' + splitedPostsCount.toString() + ')';
@@ -2100,7 +2245,7 @@ function postSubmit(e, oldLastPostId) {
         closePrompt(btnPostSubmit);
     else {
         textArea.val('').attr('placeholder', polyglot.t('Your message was sent!'));
-        btnPostSubmit.closest('form').find('.post-area-remaining').text('140');
+        btnPostSubmit.closest('form').find('.post-area-remaining').text('');
 
         if (btnPostSubmit.closest('.post-area,.post-reply-content')) {
             $('.post-area-new').removeClass('open').find('textarea').blur();
@@ -2222,10 +2367,10 @@ function initInterfaceCommon() {
     });
     $('.post-area-new')
         .on('click', function(e) {composeNewPost(e, $(this));})
-        .clickoutside(unfocusThis)
+        .clickoutside(unfocusPostAreaNew)
         .children('textarea')
             .on({
-                'focus': posPostPreview,
+                'focus': poseTextareaPostTools,
                 'input': replyTextInput,  // input event fires in modern browsers (IE9+) on any changes in textarea (and copypasting with mouse too)
                 'input focus': replyTextUpdateRemaining,
                 'keyup': replyTextKeySend
@@ -2234,7 +2379,7 @@ function initInterfaceCommon() {
     $('.post-submit').on('click', postSubmit);
     $('.modal-propagate').on('click', retweetSubmit);
     $('.expanded-content .show-more').on('mouseup',
-        {feeder: '.module.post.original.open .module.post.original .post-data'}, openConversationClick)
+        {feeder: '.module.post.original.open .module.post.original .post-data'}, handleClickOpenConversation)
         .on('click', muteEvent)  // to prevent post collapsing
     ;
     if ($.Options.unicodeConversion.val === 'disable')
@@ -2242,7 +2387,8 @@ function initInterfaceCommon() {
     else
         $('.undo-unicode').on('click', undoLastUnicode);
 
-    $('.open-profile-modal').on('click', muteEvent);
+    getElem('.open-profile-modal', true)
+        .on('click', muteEvent).on('mouseup', handleClickOpenProfileModal);
     //$('.open-hashtag-modal').on('click', openHashtagModal);
     //$('.open-following-modal').on('click', openFollowingModal);
     $('.userMenu-connections a').on('click', openMentionsModal);
@@ -2298,12 +2444,6 @@ function initInterfaceCommon() {
         .on('focus',
             function (event) {
                 twister.focus.textareaPostCur = $(event.target);
-
-                // FIXME that's a hack, need to implement complete toolbar with buttons of text formatting
-                var xtrs = twister.focus.textareaPostCur.siblings('.post-area-extras');
-                if (!xtrs.find('.shorten-uri').length)
-                    xtrs.prepend(twister.tmpl.shortenUri.clone(true));
-
                 if ($.fn.textcomplete) {  // because some pages don't have that. // network.html
                     event.data = {req: getMentionsForAutoComplete};
                     setTextcompleteOnEventTarget(event);
@@ -2447,18 +2587,32 @@ $(document).ready(function () {
             function (event) {
                 muteEvent(event);
 
-                var formPost = $(event.target).closest('.post-area-new');
-                var textArea = formPost.find(twister.focus.textareaPostCur);
-                if (!textArea.length) textArea = formPost.find(twister.focus.textareaPostPrev);
-                if (!textArea.length) textArea = formPost.find('textarea:last');
+                var postAreaNew = $(event.target).closest('.post-area-new');
+                var textArea = postAreaNew.find(twister.focus.textareaPostCur);
+                if (!textArea.length) textArea = postAreaNew.find(twister.focus.textareaPostPrev);
+                if (!textArea.length) textArea = postAreaNew.find('textarea:last');
 
                 event.data.cbReq = textArea;
-                openRequestShortURIForm(event);
+                if (postAreaNew.closest('.directMessages').length)
+                    confirmPopup({
+                        txtMessage: polyglot.t('shorten_URI_its_public_is_it_ok'),
+                        txtConfirm: polyglot.t('shorten_URI'),
+                        cbConfirm: openRequestShortURIForm,
+                        cbConfirmReq: event
+                    });
+                else if ($.mobile && postAreaNew.closest('.dm-form').length) {
+                    if (confirm(polyglot.t('shorten_URI_its_public_is_it_ok')))
+                        openRequestShortURIForm(event);
+                } else
+                    openRequestShortURIForm(event);
             }
         )
     ;
+    twister.tmpl.postTextareaEditBar = extractTemplate('#template-post-textarea-edit-bar')
+        .append(twister.tmpl.shortenUri.clone(true))
+    ;
     twister.tmpl.postRtReference = extractTemplate('#template-post-rt-reference')
-        .on('mouseup', {feeder: '.post-rt-reference'}, openConversationClick)
+        .on('mouseup', {feeder: '.post-rt-reference'}, handleClickOpenConversation)
         .on('click', muteEvent)  // to prevent post expanding or collapsing
     ;
     twister.tmpl.postRtBy = extractTemplate('#template-post-rt-by');

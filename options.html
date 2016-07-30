@@ -60,6 +60,8 @@
       <label for="t-5" class="tabs selectable_theme theme_nin">Appearance</label>
       <input id="t-6" name="option_tab" type="radio" class="selectable_theme theme_nin" />
       <label for="t-6" class="tabs selectable_theme theme_nin">Users</label>
+      <input id="t-7" name="option_tab" type="radio" class="selectable_theme theme_nin" />
+      <label for="t-7" class="tabs selectable_theme theme_nin">WebTorrent</label>
 
       <div class="tab-content">
 
@@ -310,6 +312,12 @@
                 <input name="" id="useProxyForImgOnly" class="container" type="checkbox" /> <span class="label">Use proxy for image preview only</span>
               </form>
             </div>
+            <div class="container">
+              <form action="">
+                <p class="label">Maximum post size to show</p>
+                <input type="text" id="MaxPostDisplayChars" class="container" maxlength="5" size="5"/> <span class="label">characters</span>
+              </form>
+            </div>
           </div>
           <div class="module">
             <p class="label label-h"> Top Trends </p>
@@ -416,6 +424,12 @@
               </form>
             </div>
             <div class="container">
+              <form action="">
+                <p class="label">Maximum post size to send</p>
+                <input type="text" id="MaxPostEditorChars" class="container" maxlength="5" size="5"/> <span class="label">characters</span>
+              </form>
+            </div>
+            <div class="container">
               <form action="" id="splitPostsOpt">
                 <p class="label">Split long posts</p>
                 <select name="" id="splitPosts" class="container">
@@ -450,6 +464,32 @@
           </div>
         </div>
 
+        <div class="webtorrent">
+          <div class="module">
+            <p class="label label-h"> WebTorrent </p>
+            <div class="container">
+              <form>
+                <p class="label">WebTorrent support to display shortened URL media</p>
+                <select id="WebTorrent" class="container">
+                  <option value="enable">Enable</option>
+                  <option value="disable">Disable</option>
+                </select>
+              </form>
+            </div>
+            <div id="WebTorrentCont" class="container">
+              <form>
+                <p class="label">WebTorrent default trackers to use (announce list)</p>
+                <input type="text" id="WebTorrentTrackers" size="80" class="container"/>
+                <p class="label">Auto start download from users we follow</p>
+                <select id="WebTorrentAutoDownload" class="container">
+                  <option value="enable">Enable</option>
+                  <option value="disable">Disable</option>
+                </select>
+              </form>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /tab-content -->
     </div><!-- /options -->
   </div><!-- /options -->
@@ -458,11 +498,11 @@
     <!-- template for user links in message (open profile modal) -->
     <a id="msg-user-link-template" class="open-profile-modal"></a>
     <!-- template for user links in message (open profile modal) -->
-    <a id="external-page-link-template" rel="nofollow" target="_blank"></a>
+    <a id="external-page-link-template" rel="nofollow noreferrer" target="_blank"></a>
     <!-- template for user links in message (open profile modal) -->
     <a id="hashtag-link-template" class="open-hashtag-modal"></a>
     <div id="template-link-shortened">
-        <a class="link-shortened" rel="nofollow" target="_blank"></a>
+        <a class="link-shortened" rel="nofollow noreferrer" target="_blank"></a>
     </div>
   </div>
 

@@ -126,6 +126,9 @@
           <form class="post-area-new">
             <textarea placeholder="New Post..."></textarea>
             <div class="post-area-extras">
+              <span class="post-area-attach" style="display: none;">
+                <input type="file" id="fileInputAttach" style="font-size: 10px; width: 135px;"/>
+              </span>
               <span class="post-area-remaining">140</span>
               <button class="undo-unicode disabled" disabled="disabled">undo</button>
               <button class="post-submit disabled" disabled="disabled">post</button>
@@ -163,6 +166,9 @@
           <form class="post-area-new">
             <textarea placeholder="New Post..."></textarea>
             <div class="post-area-extras">
+             <span class="post-area-attach" style="display: none;">
+                <input type="file" id="fileInputAttach" style="font-size: 10px;"/>
+             </span>
              <span class="post-area-remaining">140</span>
                 <button class="undo-unicode disabled" disabled="disabled">undo</button>
                 <button class="post-submit disabled" disabled="disabled">post</button>
@@ -313,6 +319,10 @@
         </div>
     </div>
 
+    <div id="template-post-textarea-edit-bar">
+        <div class="post-textarea-edit-bar"><!-- TODO add buttons to format text --></div>
+    </div>
+
     <div id="template-shorten-uri">
         <a class="shorten-uri">shorten URL</a>
     </div>
@@ -387,11 +397,11 @@
     <!-- template for user links in message (open profile modal) -->
     <a id="msg-user-link-template" class="open-profile-modal"></a>
     <!-- template for user links in message (open profile modal) -->
-    <a id="external-page-link-template" rel="nofollow" target="_blank"></a>
+    <a id="external-page-link-template" rel="nofollow noreferrer" target="_blank"></a>
     <!-- template for user links in message (open profile modal) -->
     <a id="hashtag-link-template" class="open-hashtag-modal"></a>
     <div id="template-link-shortened">
-        <a class="link-shortened" rel="nofollow" target="_blank"></a>
+        <a class="link-shortened" rel="nofollow noreferrer" target="_blank"></a>
     </div>
 
     <!-- template para ir dentro de avatar-row -->
@@ -628,7 +638,7 @@
               <h2 class="profile-screen-name">@<b></b></h2>
               <div>
                 <span class="profile-location"></span>
-                <a class="profile-url" rel="nofollow" target="_blank"></a>
+                <a class="profile-url" rel="nofollow noreferrer" target="_blank"></a>
               </div>
               <div class="profile-bio"></div>
               <div id="msngrswr">
