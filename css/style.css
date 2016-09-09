@@ -300,6 +300,16 @@ button.follow:hover, button.unfollow:hover, .following-own-modal .following-list
     opacity: 0.9;
 }
 
+.userMenu li.userMenu-favs > a {
+    padding: 0 14px;
+    opacity: 1;
+}
+
+.userMenu li.userMenu-favs > a:before {
+    content: '★';
+    font-size: 24px;
+}
+
 .userMenu li.userMenu-profile > a {
     background: url(../img/profile.png) no-repeat 5px center;
 }
@@ -1280,6 +1290,7 @@ ol.toptrends-list {
 .post-favorite:before
 {
     content: "★";
+    font-size: 18px;
 }
 .post-reply:hover,
 .post-propagate:hover,
@@ -1304,6 +1315,10 @@ ol.toptrends-list {
 .image-preview video
 {
     width: 100%;
+}
+.image-preview img
+{
+    max-width: 100%;
 }
 .preview-container
 {
@@ -1929,6 +1944,42 @@ ol.toptrends-list {
 .who-to-follow-modal .bio {
     font-size: 12px;
     color: rgba( 0, 0, 0, .6 );
+}
+
+/*************************************
+********* URI SHORTENER MODAL ********
+**************************************/
+
+.uri-shortener-modal .uris-list {
+    font-size: 12px;
+    overflow-x: hidden;
+}
+
+.uri-shortener-modal .uris-list li {
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-bottom: 4px;
+}
+
+.uri-shortener-modal .uris-list li:last-child {
+    margin-bottom: 16px;
+}
+
+.uri-shortener-modal .uris-list li.highlighted,
+.uri-shortener-modal .uris-list li:hover {
+    background-color: #FEFEDF;
+}
+
+.uri-shortener-modal .uris-list .short {
+    background-color: #F0EFCC;
+    display: inline-block;
+    width: 26%;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.uri-shortener-modal .uris-list .long {
+    margin-left: 4px;
 }
 
 /*************************************

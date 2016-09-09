@@ -449,6 +449,8 @@ function openUserProfileModalWithNameHandler(peerAlias) {
     content.find('.tox-ctc').attr('title', polyglot.t('Copy to clipboard'));
     content.find('.bitmessage-ctc').attr('title', polyglot.t('Copy to clipboard'));
 
+    content.find('.open-followers').on('mouseup', {route: '#followers?user=' + peerAlias}, routeOnClick);
+
     var modal = openModal({
         classAdd: 'profile-modal',
         content: content,
@@ -506,6 +508,39 @@ function updateQueryModal(req) {
     }
 
     requestQuery(req);
+}
+
+function openFavsModal(event) {
+    if (event && typeof event.stopPropagation === 'function') {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    var userInfo = $(this).closest('[data-screen-name]');
+    var peerAlias = '';
+    if (userInfo.length)
+        peerAlias = userInfo.attr('data-screen-name');
+    else if (defaultScreenName)
+        peerAlias = defaultScreenName;
+    else {
+        alertPopup({
+            //txtTitle: polyglot.t(''), add some title (not 'error', please) or just KISS
+            txtMessage: polyglot.t('No favs here because you are not logged in.')
+        });
+        return;
+    }
+
+    window.location.hash = '#favs?user=' + peerAlias;
+}
+
+function openFavsModalHandler(peerAlias) {
+    var modal = openModal({
+        classAdd: 'hashtag-modal',
+        content: $('#hashtag-modal-template').children().clone(true),
+        title: polyglot.t('users_favs', {username: peerAlias})
+    });
+
+    setupQueryModalUpdating(modal.content.find('.postboard-posts'), peerAlias, 'fav');
 }
 
 function openMentionsModal(event) {
@@ -735,6 +770,30 @@ function openWhoToFollowModal() {
     fillWhoToFollowModal(tmplist, hlist, 0);
 }
 
+function openModalUriShortener()
+{
+    var modal = openModal({
+        classAdd: 'uri-shortener-modal',
+        content: twister.tmpl.uriShortenerMC.clone(true),
+        title: polyglot.t('URI_shortener')
+    });
+
+    modal.content.find('.uri-shortener-control .shorten-uri').text(polyglot.t('shorten_URI'));
+    modal.content.find('.uri-shortener-control .clear-cache').text(polyglot.t('clear_cache'));
+
+    var urisList = modal.content.find('.uris-list');
+    //var i = 0;
+    for (var short in twister.URIs) {
+        //i++;
+        var long = twister.URIs[short] instanceof Array ? twister.URIs[short][0] : twister.URIs[short];
+        var item = twister.tmpl.uriShortenerUrisListItem.clone(true);
+        item.find('.short').text(short);
+        item.find('.long').text(long).attr('href', long);
+        item.appendTo(urisList);
+    }
+    //i + URIs are cached
+}
+
 function newConversationModal(peerAlias, resource) {
     var content = $('#hashtag-modal-template').children().clone(true);
 
@@ -952,7 +1011,7 @@ function applyShortenedURI(short, uriAndMimetype) {
                     previewContainer.append(startTorrentLink);
                 }
             } else {
-                var enableWebTorrentWarning = $('<span>' + 
+                var enableWebTorrentWarning = $('<span>' +
                     polyglot.t('Enable WebTorrent support in options page to display this content') +
                     '</span>');
                 previewContainer.append(enableWebTorrentWarning);
@@ -972,7 +1031,7 @@ function startTorrentDownloadAndPreview(torrentId, previewContainer, isMedia) {
 
 function _startTorrentDownloadAndPreview(torrentId, previewContainer, isMedia) {
     var torrent = WebTorrentClient.get(torrentId);
-    if( torrent === null ) 
+    if( torrent === null )
         torrent = WebTorrentClient.add(torrentId);
 
     previewContainer.empty();
@@ -1003,7 +1062,7 @@ function webtorrentFilePreview(file, previewContainer, isMedia) {
         // try guessing by filename extension
         isMedia = /^[^?]+\.(?:jpe?g|gif|png|mp4|webm|mp3|ogg|wav|)$/i.test(file.name)
     }
-    
+
     if (isMedia) {
         var imagePreview = $('<div class="image-preview" />');
         previewContainer.append(imagePreview);
@@ -1012,7 +1071,9 @@ function webtorrentFilePreview(file, previewContainer, isMedia) {
                 elem.pause();
             }
         });
-        imagePreview.find("video").removeAttr("autoplay");
+        var $vid = imagePreview.find("video");
+        $vid.removeAttr("autoplay");
+        $vid.on('click mouseup', muteEvent);
     } else {
         file.getBlobURL(function (err, url) {
             if (err) return console.error(err)
@@ -1037,6 +1098,9 @@ function routeOnClick(event) {
     }
 
     if (!event || !event.data || !event.data.route)
+        return;
+
+    if (event.button === 0 && window.getSelection().toString() !== '')
         return;
 
     event.stopPropagation();
@@ -1100,7 +1164,7 @@ function loadModalFromHash() {
 
     // FIXME rework hash scheme from '#following?user=twister' to something like '#/@twister/following'
     if (hashdata[0] !== '#web+twister')
-        hashdata = hashstring.match(/(hashtag|profile|mentions|directmessages|followers|following|conversation)\?(?:group|user|hashtag|post)=(.+)/);
+        hashdata = hashstring.match(/(hashtag|profile|mentions|directmessages|followers|following|conversation|favs)\?(?:group|user|hashtag|post)=(.+)/);
 
     if (hashdata && hashdata[1] !== undefined && hashdata[2] !== undefined) {
         if (hashdata[1] === 'profile')
@@ -1127,6 +1191,8 @@ function loadModalFromHash() {
             splithashdata2 = hashdata[2].split(':');
             openConversationModal(splithashdata2[0], splithashdata2[1]);
         }
+        else if (hashdata[1] === 'favs')
+            openFavsModalHandler(hashdata[2]);
     } else if (hashstring === '#directmessages')
         openCommonDMsModal();
     else if (hashstring === '#followers')
@@ -1141,6 +1207,8 @@ function loadModalFromHash() {
         openGroupMessagesJoinGroupModal();
     else if (hashstring === '#whotofollow')
         openWhoToFollowModal();
+    else if (hashstring === '#/uri-shortener')
+        openModalUriShortener();
 }
 
 function initHashWatching() {
@@ -1211,6 +1279,49 @@ function reTwistPopup(event, post, textArea) {
         }
     }
     replyArea.find('.post-submit').addClass('with-reference');
+}
+
+function favPopup(event, post, textArea) {
+    event.stopPropagation();
+
+    if (!defaultScreenName) {
+        alertPopup({
+            txtMessage: polyglot.t('You have to log in to favorite messages.')
+        });
+        return;
+    }
+
+    if (typeof post === 'undefined')
+        post = $.evalJSON($(event.target).closest('.post-data').attr('data-userpost'));
+
+    var modal = openModal({
+        classBase: '.prompt-wrapper',
+        classAdd: 'fav-this',
+        title: polyglot.t('fav_this')
+    });
+
+    modal.content
+        .append(postToElem(post, ''))
+        .append($('#fav-modal-template').children().clone(true))
+    ;
+    /*
+    //TODO: favs can be also commented
+    var replyArea = modal.content.find('.post-area .post-area-new');
+    if (typeof textArea === 'undefined') {
+        textArea = replyArea.find('textarea');
+        var textAreaPostInline = modal.content.find('.post .post-area-new textarea');
+        $.each(['placeholder', 'data-reply-to'], function(i, attribute) {
+            textArea.attr(attribute, textAreaPostInline.attr(attribute));
+        });
+    } else {
+        replyArea.find('textarea').replaceWith(textArea);
+        if (textArea.val()) {
+            textArea.focus();
+            replyArea.addClass('open');
+        }
+    }
+    replyArea.find('.post-submit').addClass('with-reference');
+    */
 }
 
 // Expande Área do Novo post
@@ -1426,7 +1537,7 @@ function postExpandFunction(e, postLi) {
         var originalLi = $('<li/>', {class: 'module post original'}).appendTo(itemOl)
             .append(originalPost);
 
-        setPostImagePreview(postExpandedContent, originalPost.find('a[rel="nofollow"]'));
+        setPostImagePreview(postExpandedContent, originalPost.find('a[rel^="nofollow"]'));
 
         postExpandedContent.slideDown('fast');
 
@@ -1724,7 +1835,7 @@ function replyTextUpdateRemaining(ta) {
                     return false;
                 }
             });
-            if (!disable && c >= 0 && c < $.Options.MaxPostEditorChars.val && 
+            if (!disable && c >= 0 && c < $.Options.MaxPostEditorChars.val &&
                  textArea.val() !== textArea.attr('data-reply-to')) {
                 remainingCount.removeClass('warn');
                 $.MAL.enableButton(buttonSend);
@@ -2265,6 +2376,17 @@ function retweetSubmit(event) {
     closePrompt(prompt);
 }
 
+function favSubmit(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    var prompt = $(event.target).closest('.prompt-wrapper');
+    var priv = (event.target.className.indexOf('private') > -1);
+
+    newFavMsg(prompt.find('.post-data'), priv);
+    closePrompt(prompt);
+}
+
 function changeStyle() {
     var style, profile, menu;
     var theme = $.Options.theme.val;
@@ -2336,6 +2458,56 @@ function replaceDashboards() {
 
 function initInterfaceCommon() {
     twister.tmpl.commonDMsList = extractTemplate('#template-direct-messages-list');
+    twister.tmpl.uriShortenerMC = extractTemplate('#template-uri-shortener-modal-content');
+    twister.tmpl.uriShortenerMC
+        .find('.shorten-uri').on('click',
+            {cbFunc:
+                function (long, short) {
+                    if (short) {
+                        var urisList = getElem('.uri-shortener-modal .uris-list');
+                        if (urisList.length) {
+                            var item = urisList.find('.short:contains("' + short + '")').closest('li');
+                            if (!item.length) {
+                                item = twister.tmpl.uriShortenerUrisListItem.clone(true);
+                                item.find('.short').text(short);
+                                item.find('.long').text(long).attr('href', long);
+                                item.appendTo(urisList);
+                            }
+                            urisList.children('.highlighted').removeClass('highlighted');
+                            item.addClass('highlighted');
+                            var mc = urisList.closest('.modal-content');
+                            mc.scrollTop(item.offset().top - mc.offset().top + mc.scrollTop());
+                        }
+                        showURIPair(long, short);
+                    } else
+                        showURIShortenerErrorRPC(short);
+                }
+            },
+            function (event) {
+                muteEvent(event);
+                openRequestShortURIForm(event);
+            }
+        )
+        .siblings('.clear-cache').on('click',
+            function () {
+                confirmPopup({
+                    txtMessage: polyglot.t('confirm_uri_shortener_clear_cache'),
+                    cbConfirm: function () {
+                        twister.URIs = {};
+                        $.localStorage.set('twistaURIs', twister.URIs);
+                        getElem('.uri-shortener-modal .uris-list').empty();
+                    }
+                });
+            }
+        )
+    ;
+    twister.tmpl.uriShortenerUrisListItem = extractTemplate('#template-uri-shortener-uris-list-item')
+        .on('click', function (event) {
+            var elem = $(event.target);
+            elem.closest('.uris-list').children('.highlighted').removeClass('highlighted');
+            elem.addClass('highlighted');
+        })
+    ;
 
     $('.modal-close, .modal-blackout').not('.prompt-close').on('click', closeModal);
 
@@ -2354,11 +2526,12 @@ function initInterfaceCommon() {
         closePrompt(event);
     });
 
-    $('.open-followers').on('mouseup', {route: '#followers'}, routeOnClick);
+    $('.module.mini-profile .open-followers').on('mouseup', {route: '#followers'}, routeOnClick);
 
     $('.post-text').on('click', 'a', muteEvent);
     $('.post-reply').on('click', postReplyClick);
     $('.post-propagate').on('click', reTwistPopup);
+    $('.post-favorite').on('click', favPopup);
     $('.userMenu-config').clickoutside(closeThis.bind($('.config-menu')));
     $('.userMenu-config-dropdown').on('click', dropDownMenu);
     $('#post-template.module.post').on('click', function(event) {
@@ -2378,6 +2551,8 @@ function initInterfaceCommon() {
     ;
     $('.post-submit').on('click', postSubmit);
     $('.modal-propagate').on('click', retweetSubmit);
+    $('.modal-fav-public').on('click', favSubmit);
+    $('.modal-fav-private').on('click', favSubmit);
     $('.expanded-content .show-more').on('mouseup',
         {feeder: '.module.post.original.open .module.post.original .post-data'}, handleClickOpenConversation)
         .on('click', muteEvent)  // to prevent post collapsing
@@ -2393,6 +2568,8 @@ function initInterfaceCommon() {
     //$('.open-following-modal').on('click', openFollowingModal);
     $('.userMenu-connections a').on('click', openMentionsModal);
     $('.mentions-from-user').on('click', openMentionsModal);
+    $('.userMenu-favs a').on('click', openFavsModal);
+    $('.favs-from-user').on('click', openFavsModal);
 
     $('#hashtag-modal-template .postboard-news').on('click', function () {
         $(this).hide();
@@ -2438,7 +2615,7 @@ function initInterfaceCommon() {
     $('.tox-ctc').on('click', promptCopyAttrData);
     $('.bitmessage-ctc').on('click', promptCopyAttrData);
 
-    $('.uri-shortener').on('click', openRequestShortURIForm);  // FIXME implement Uri Shortener Center with links library etc
+    $('.uri-shortener').on('mouseup', {route: '#/uri-shortener'}, routeOnClick);
 
     $('.post-area-new textarea')
         .on('focus',
