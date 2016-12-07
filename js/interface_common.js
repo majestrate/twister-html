@@ -63,6 +63,16 @@ function openModal(modal) {
     else
         modal.content = modal.self.find('.modal-content');
 
+    if (modal.warn && modal.warn.name && modal.warn.text) {
+        var elem = twister.tmpl.modalComponentWarn.clone(true)
+            .attr('data-warn-name', modal.warn.name)
+            .toggle(!$.Options.get('skipWarn' + modal.warn.name))
+        ;
+        fillElemWithTxt(elem.find('.text'), modal.warn.text, {markout: 'apply'});
+        elem.find('.options .never-again + span').text(polyglot.t('do_not_show_it_again'));
+        elem.insertBefore(modal.content);
+    }
+
     modal.self.appendTo('body').fadeIn('fast');  // FIXME maybe it's better to append it to some container inside body
 
     if (modal.classBase === '.modal-wrapper') {
@@ -71,7 +81,9 @@ function openModal(modal) {
 
         modal.drapper = $('<div>').appendTo(twister.html.detached);  // here modal goes instead detaching
 
-        modal.content.outerHeight(modal.self.height() - modal.self.find('.modal-header').outerHeight());
+        modal.content.outerHeight(modal.self.height() - modal.self.find('.modal-header').outerHeight()
+            - modal.self.find('.inline-warn').outerHeight()
+            * (modal.warn && !$.Options.get('skipWarn' + modal.warn.name) ? 1 : 0));
 
         var windowHeight = $(window).height();
         if (modal.self.outerHeight() > windowHeight) {
@@ -106,6 +118,9 @@ function closeModal(req, switchMode) {
                 twister.modal[i].btnResume.fadeOut('fast', function () {this.remove();});
             else
                 this.remove();  // if it's minimized it will be removed with twister.modal[i].drapper
+
+            if (typeof twister.modal[i].onClose === 'function')
+                twister.modal[i].onClose(twister.modal[i].onCloseReq);
 
             twister.modal[i].drapper.remove();
             twister.modal[i] = undefined;
@@ -377,6 +392,7 @@ function checkNetworkStatusAndAskRedirect(cbFunc, cbReq) {
 }
 
 function timeGmtToText(t) {
+    if (t == 0) return '-';
     var d = new Date(0);
     d.setUTCSeconds(t);
     return d.toString().replace(/GMT.*/g, '');
@@ -587,7 +603,7 @@ function openMentionsModalHandler(peerAlias) {
 }
 
 function openFollowersModal(peerAlias) {
-    var followers, title, txtAlert;
+    var followers, title, warn;
 
     if (!peerAlias || peerAlias === defaultScreenName) {
         if (!defaultScreenName) {
@@ -600,22 +616,27 @@ function openFollowersModal(peerAlias) {
         }
         title = polyglot.t('Followers');
         followers = twisterFollowingO.knownFollowers.slice();
-        txtAlert = '* ' + polyglot.t('warn_followers_not_all');
+        warn = {
+            name: 'FollowersNotAll',
+            text: '* ' + polyglot.t('warn_followers_not_all')
+        };
     } else {
         title = polyglot.t('Followers_of', {alias: peerAlias});
         followers = whoFollows(peerAlias);
-        txtAlert = polyglot.t('warn_followers_not_all_of', {alias: peerAlias});
+        warn = {
+            name: 'FollowersNotAllOf',
+            text: polyglot.t('warn_followers_not_all_of', {alias: peerAlias})
+        };
     }
 
     var modal = openModal({
         classAdd: 'followers-modal',
         content: twister.tmpl.followersList.clone(true),
-        title: title
+        title: title,
+        warn: warn
     });
 
     appendFollowersToElem(modal.content.find('ol'), followers);
-
-    alertPopup({txtMessage: txtAlert});
 }
 
 function appendFollowersToElem(list, followers) {
@@ -693,6 +714,7 @@ function addPeerToFollowingList(list, peerAlias) {
         .on('mouseup', {route: $.MAL.mentionsUrl(peerAlias)}, routeOnClick);
     getAvatar(peerAlias, item.find('.mini-profile-photo'));
     getFullname(peerAlias, item.find('.mini-profile-name'));
+    getStatusTime(peerAlias, item.find('.latest-activity .time'));
 
     if (peerAlias === defaultScreenName)
         item.find('.following-config').hide();
@@ -712,9 +734,6 @@ function addPeerToFollowingList(list, peerAlias) {
 }
 
 function fillWhoToFollowModal(list, hlist, start) {
-    var itemTmp = $('#follow-suggestion-template').clone(true)
-        .removeAttr('id');
-
     for (var i = 0; i < followingUsers.length && list.length < start + 20; i++) {
         if (typeof twisterFollowingO.followingsFollowings[followingUsers[i]] !== 'undefined') {
             for (var j = 0; j < twisterFollowingO.followingsFollowings[followingUsers[i]].following.length && list.length < start + 25; j++) {
@@ -722,26 +741,11 @@ function fillWhoToFollowModal(list, hlist, start) {
                 if (followingUsers.indexOf(utf) < 0 && list.indexOf(utf) < 0) {
                     list.push(utf);
 
-                    var item = itemTmp.clone(true);
-
-                    item.find('.twister-user-info').attr('data-screen-name', utf);
-                    item.find('.twister-user-name').attr('href', $.MAL.userUrl(utf));
-                    item.find('.twister-by-user-name').attr('href', $.MAL.userUrl(followingUsers[i]));
-                    item.find('.twister-user-tag').text('@' + utf);
-
-                    getAvatar(utf, item.find('.twister-user-photo'));
-                    getFullname(utf, item.find('.twister-user-full'));
-                    getBioToElem(utf, item.find('.bio'));
-                    getFullname(followingUsers[i], item.find('.followed-by').text(followingUsers[i]));
-
-                    item.find('.twister-user-remove').remove();
-
-                    hlist.append(item);
+                    processWhoToFollowSuggestion(hlist, utf, followingUsers[i]);
                 }
             }
         }
     }
-    itemTmp.remove();
 
     if (i >= followingUsers.length - 1)
         return false;
@@ -762,12 +766,36 @@ function openWhoToFollowModal() {
 
     modal.content.on('scroll', function() {
         if (modal.content.scrollTop() >= hlist.height() - modal.content.height() - 20) {
-            if (!fillWhoToFollowModal(tmplist, hlist, tmplist.length))
+            if (!fillWhoToFollowModal(tmplist, modal.self, tmplist.length))
                 modal.content.off('scroll');
         }
     });
 
-    fillWhoToFollowModal(tmplist, hlist, 0);
+    fillWhoToFollowModal(tmplist, modal.self, 0);
+}
+
+function openNewUsersModal() {
+    var modal = openModal({
+        classAdd: 'new-users-modal',
+        title: polyglot.t('New Users'),
+        onClose: function() {
+            NewUserSearch.isNewUserModalOpen = false;
+        }
+    });
+
+    var hlist = $('<ol class="follow-suggestions"></ol>')
+        .appendTo(modal.content);
+    var count = 15;
+
+    modal.content.on('scroll', function() {
+        if (modal.content.scrollTop() >= hlist.height() - modal.content.height() - 20) {
+            if (newUsers.getLastNUsers(5, count, modal.self))
+                count += 5;
+        }
+    });
+
+    NewUserSearch.isNewUserModalOpen = true;
+    newUsers.getLastNUsers(15, 0, modal.self);
 }
 
 function openModalUriShortener()
@@ -855,14 +883,22 @@ function handleClickOpenProfileModal(event) {
 }
 
 function handleClickOpenConversation(event) {
-    event.preventDefault();
-    event.stopPropagation();
+    var elem = $(event.target).closest(event.data.feeder);
+    if (!elem.length) {
+        muteEvent(event, true);
+        return;
+    }
 
-    var elem = $(event.target);
-    var postData = elem.closest(event.data.feeder);
+    var post = {
+        writer: elem.attr('data-screen-name'),
+        id: elem.attr('data-id')
+    };
+    if (!post.writer || !post.id) {
+        muteEvent(event, true);
+        return;
+    }
 
-    event.data.route = '#conversation?post=' + postData.attr('data-screen-name')
-        + ':post' + postData.attr('data-id');
+    event.data.route = '#conversation?post=' + post.writer + ':post' + post.id;
     routeOnClick(event);
 }
 
@@ -887,8 +923,8 @@ function openRequestShortURIForm(event) {
     if (parseInt(twisterVersion) < 93500) {
         alertPopup({
             //txtTitle: polyglot.t(''), add some title (not 'error', please) or just KISS
-            txtMessage: 'You can\'t shorten links because twister daemon is obsolete!\n'
-                + 'Version 0.9.35 or higher is required. Please keep your twister up to date.'
+            txtMessage: 'You can\'t shorten links —\n'
+                + polyglot.t('daemon_is_obsolete', {versionReq: '0.9.35'})
         });
         return;
     }
@@ -968,12 +1004,28 @@ function fetchShortenedURI(req, attemptCount) {
 function applyShortenedURI(short, uriAndMimetype) {
     var long = (uriAndMimetype instanceof Array) ? uriAndMimetype[0] : uriAndMimetype;
     var mimetype = (uriAndMimetype instanceof Array) ? uriAndMimetype[1] : undefined;
-    var elems = getElem('.link-shortened[href="' + short + '"]')
+    var elems = getElem('.link-shortened[href="' + short + '"]');
+
+    if (isUriSuspicious(long)) {
+        elems.replaceWith(
+            '…<br><b><i>' + polyglot.t('busted_oh') + '</i> '
+            + polyglot.t('busted_avowal') + ':</b><br><samp>'
+            + long
+                .replace(/&(?!lt;|gt;)/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;')
+            + '</samp><br>…<br>'
+        );
+        return;
+    }
+
+    elems
         .attr('href', long)
         .removeClass('link-shortened')
         .off('click mouseup')
         .on('click mouseup', muteEvent)
     ;
+
     var cropped = (/*$.Options.cropLongURIs &&*/ long.length > 23) ? long.slice(0, 23) + '…' : undefined;
     for (var i = 0; i < elems.length; i++) {
         if (elems[i].text === short)  // there may be some other text, possibly formatted, so we check it
@@ -1209,6 +1261,8 @@ function loadModalFromHash() {
         openWhoToFollowModal();
     else if (hashstring === '#/uri-shortener')
         openModalUriShortener();
+    else if (hashstring === '#newusers')
+        openNewUsersModal();
 }
 
 function initHashWatching() {
@@ -2457,6 +2511,33 @@ function replaceDashboards() {
 }
 
 function initInterfaceCommon() {
+    twister.tmpl.modalComponentWarn = extractTemplate('#template-inline-warn');
+    twister.tmpl.modalComponentWarn.find('.close').on('click',
+        function(event) {
+            var i = $(event.target).closest('.modal-wrapper').attr('data-modal-id');
+
+            if (!i || !twister.modal[i]) return;
+
+            var modal = twister.modal[i];
+
+            modal.self.find('.inline-warn').hide();
+
+            modal.content.outerHeight(modal.self.height() - modal.self.find('.modal-header').outerHeight());
+
+            var windowHeight = $(window).height();
+            if (modal.self.outerHeight() > windowHeight) {
+                modal.content.outerHeight(modal.content.outerHeight() - modal.self.outerHeight() + windowHeight);
+                modal.self.outerHeight(windowHeight);
+                modal.self.css('margin-top', - windowHeight / 2);
+            }
+        }
+    );
+    twister.tmpl.modalComponentWarn.find('.options .never-again').on('change',
+        function(event) {
+            $.Options.set('skipWarn' + $(event.target).closest('.inline-warn')
+                .attr('data-warn-name'), event.target.checked);  // e.g. 'skipWarnFollowersNotAll'
+        }
+    );
     twister.tmpl.commonDMsList = extractTemplate('#template-direct-messages-list');
     twister.tmpl.uriShortenerMC = extractTemplate('#template-uri-shortener-modal-content');
     twister.tmpl.uriShortenerMC
@@ -2575,6 +2656,9 @@ function initInterfaceCommon() {
         $(this).hide();
         displayQueryPending($('.hashtag-modal .postboard-posts'));
     });
+
+    getElem('.latest-activity', true).on('mouseup',
+        {feeder: '.latest-activity'}, handleClickOpenConversation);
 
     replaceDashboards();
     $(window).resize(replaceDashboards);
@@ -2744,6 +2828,7 @@ $(document).ready(function () {
     twister.tmpl.followersPeer = extractTemplate('#template-followers-peer');
     twister.tmpl.followingList = extractTemplate('#template-following-list');
     twister.tmpl.followingPeer = extractTemplate('#template-following-peer');
+    twister.tmpl.whoTofollowPeer = extractTemplate('#template-whotofollow-peer');
     twister.tmpl.commonDMsListItem = extractTemplate('#template-direct-messages-list-item')
         .on('mouseup', function (event) {
             event.data = {route:

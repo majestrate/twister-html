@@ -146,6 +146,8 @@
 
       <!-- TWISTDAY REMINDER MODULE -->
       <div class="module twistday-reminder" style="display: none;"></div>
+
+      <div class="module new-users" style="display: none;"></div>
     </div>
   <!-- LADO ESQUERDO DE MÓDULOS END -->
 
@@ -218,14 +220,27 @@
         <a class="refresh-users">Refresh</a>
         <small>.</small>
         <a class="view-all-users" href="#whotofollow">View All</a>
-        <ol class="follow-suggestions">
-          <!-- use "follow-suggestion-template" here -->
-        </ol>
+        <ol class="follow-suggestions"></ol>
       </div>
       <div class="loading-roller">
         <div></div>
       </div>
     </div>
+
+      <!-- TEMPLATE OF NEW-USERS MODULE -->
+      <div id="new-users-template">
+          <div>
+              <h3 class="label">New Users</h3>
+              <small>.</small>
+              <a class="refresh-users">Refresh</a>
+              <small>.</small>
+              <a class="view-all-users" href="#newusers">View All</a>
+              <ol class="follow-suggestions"></ol>
+          </div>
+          <div class="loading-roller">
+              <div></div>
+          </div>
+      </div>
 
     <!-- TEMPLATE DE TOP TRENDS MODULE -->
     <div id="toptrends-template">
@@ -282,8 +297,8 @@
       </div>
     </li>
 
-    <!-- TEMPLATE DE WHO-TO-FOLLOW SUGGESTION -->
-    <li id="follow-suggestion-template" class="twister-user">
+    <div id="template-whotofollow-peer">
+    <li class="twister-user">
       <div class="">
         <a href="#" class="twister-user-name open-profile-modal">
           <img class="twister-user-photo" src="img/grayed_avatar_placeholder_24.png" alt="user-photo"/>
@@ -302,9 +317,14 @@
           </a>
         </div>
         <a class="twister-user-remove">&times;</a>
+        <div class="latest-activity" data-screen-name="" data-id="" data-time="0">
+          <span class="label">Last activity</span>
+          <span class="time"></span>
+        </div>
         <button class="follow">Follow</button>
       </div>
     </li>
+    </div>
 
     <!-- TEMPLATE DA OL INVÓLUCRO DAS LIST ELEMENTS DO POST EXPANDIDO INIT -->
     <ol class="expanded-post">
@@ -424,6 +444,16 @@
         </div>
         <div class="modal-content"></div>
         <div class="modal-blackout"></div>
+    </div>
+
+    <div id="template-inline-warn">
+        <div class="inline-warn">
+            <div class="close">&times;</div>
+            <div class="text"></div>
+            <div class="options">
+                <div><input type="checkbox" class="never-again" /><span>don't show it again</span></div>
+            </div>
+        </div>
     </div>
 
     <div class="prompt-wrapper">
@@ -619,10 +649,6 @@
                 <input class="secret-key-import" type="textbox" placeholder="52-characters secret" size="52" rows="1"></input>
             </div>
             <div>
-                <p class="label">With group alias</p>
-                <input class="username-import" type="textbox" placeholder="Type group alias here" size="16" rows="1"></input>
-            </div>
-            <div>
                 <button class="import-secret-key" disabled="disabled">Import key</button>
             </div>
         </div>
@@ -765,6 +791,10 @@
                 </div>
                 <div>
                     <span class="swarm-status" style="display: none;"></span>
+                </div>
+                <div class="latest-activity" data-screen-name="" data-id="" data-time="0">
+                    <span class="label">Last activity</span>
+                    <span class="time"></span>
                 </div>
             </div>
         </li>

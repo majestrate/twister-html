@@ -62,6 +62,7 @@ if(preferredLanguage == "en"){
       "Configure block generation": "Configure block generation",
       "Connections:": "Connections: ", // to network
       "Connection lost.": "Connection lost.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} day |||| %{smart_count} days",
       "Detailed information": "Detailed information",
       "DHT network down.": "DHT network down.",
@@ -69,11 +70,16 @@ if(preferredLanguage == "en"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "Disable",
       "display_mentions": "Display mentions",
       "Display retransmissions": "Display retransmissions",
       "DNS to obtain list of peers:": "DNS to obtain list of peers:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Downloading block chain, please wait before continuing (block chain is %{days} days old).",
       "download_posts_status": "Downloaded %{portion} posts", // Downloaded 10/30 posts
       "Enable": "Enable",
@@ -365,7 +371,10 @@ if(preferredLanguage == "en"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+      "New Users": "New Users",
+      "Live tracking" : "Live tracking"
     };
 }
 if(preferredLanguage == "es"){
@@ -404,6 +413,7 @@ if(preferredLanguage == "es"){
       "Configure block generation": "Configure la generación de bloques",
       "Connections:": "Conexiones: ", // to network
       "Connection lost.": "Conexión perdida.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} día |||| %{smart_count} días",
       "Detailed information": "Información detallada",
       "DHT network down.": "Red DHT caida.",
@@ -411,11 +421,16 @@ if(preferredLanguage == "es"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Mensajes directos con %{username}",
       "Disable": "Inhabilitar",
       "display_mentions": "Visualización de menciones",
       "Display retransmissions": "Visualización de retransmisiones",
       "DNS to obtain list of peers:": "DNS para obtener la lista de los pares:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Descarga de la cadena de bloques, por favor espere antes de continuar (la cadena de bloques esta %{days} días).",
       "download_posts_status": "Post %{portion} descargados", // Downloaded 10/30 posts
       "Enable": "Permitir",
@@ -703,7 +718,10 @@ if(preferredLanguage == "es"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+      "New Users": "New Users",
+      "Live tracking" : "Live tracking"
     };
 }
 
@@ -743,6 +761,7 @@ if(preferredLanguage == "uk"){
       "Configure block generation": "Налаштувати генерацію блоку",
       "Connections:": "З’єднання: ", // to network
       "Connection lost.": "З’єднання втрачено.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} день |||| %{smart_count} днів",
       "Detailed information": "Детальна інформація",
       "DHT network down.": "Мережа DHT недоступна.",
@@ -750,11 +769,16 @@ if(preferredLanguage == "uk"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "Вимкнено",
       "display_mentions": "Показати сповіщення",
       "Display retransmissions": "Показати пересилання",
       "DNS to obtain list of peers:": "DNS для отримання пірів:",
+      "do_not_show_it_again": "don't show it again",
       "dns address": "адреса DNS",
       "downloading_block_chain": "Завантаження ланцюга блоків, будь ласка, зачекайте перед продовженням (ланцюг блоків віком %{days} днів).",
       "download_posts_status": "Завантажено %{portion} твістів", // Downloaded 10/30 posts
@@ -1040,7 +1064,10 @@ if(preferredLanguage == "uk"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -1080,6 +1107,7 @@ if(preferredLanguage == "zh-CN"){
       "Configure block generation": "配置区块生成器",
       "Connections:": "连接数：", // to network
       "Connection lost.": "连接中断。",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} 天",
       "Detailed information": "详细信息",
       "DHT network down.": "DHT网络中断。",
@@ -1087,11 +1115,16 @@ if(preferredLanguage == "zh-CN"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "关闭",
       "display_mentions": "显示",
       "Display retransmissions": "显示转发",
       "DNS to obtain list of peers:": "用DNS获取节点列表：",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "区块链下载中，请等待下载完成（区块链仍落后 %{days} 天）。",
       "download_posts_status": "已下载 %{portion} 推文", // Downloaded 10/30 posts
       "Enable": "开启",
@@ -1382,7 +1415,10 @@ if(preferredLanguage == "zh-CN"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -1422,6 +1458,7 @@ if(preferredLanguage == "nl"){
       "Configure block generation": "Block productie configureren",
       "Connections:": "Connecties: ", // to network
       "Connection lost.": "Verbinding kwijt.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} dag |||| %{smart_count} dagen",
       "Detailed information": "Gedetailleerde informatie",
       "DHT network down.": "DHT netwerk down.",
@@ -1429,11 +1466,16 @@ if(preferredLanguage == "nl"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "Uitschakelen",
       "display_mentions": "Toon vermeldingen",
       "Display retransmissions": "Toon retransmissions",
       "DNS to obtain list of peers:": "DNS om peers lijst op te halen:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Bezig met downloaden block chain, wacht a.u.b. voordat je doorgaat (block chain is %{days} dagen oud).",
       "download_posts_status": "%{portion} berichten gedownload", // Downloaded 10/30 posts
       "Enable": "Activeren",
@@ -1721,7 +1763,10 @@ if(preferredLanguage == "nl"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -1761,6 +1806,7 @@ if(preferredLanguage == "it"){
       "Configure block generation": "Configura generatore di blocchi",
       "Connections:": "Connessioni: ", // to network
       "Connection lost.": "Connessione interrotta.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} giorno |||| %{smart_count} giorni",
       "Detailed information": "Informazioni dettagliate",
       "DHT network down.": "DHT network inaccessibile.",
@@ -1768,11 +1814,16 @@ if(preferredLanguage == "it"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Messaggi Diretti come %{username}",
       "Disable": "Disabilitato",
       "display_mentions": "Mostra le menzioni",
       "Display retransmissions": "Mostra Ripubblicazioni",
       "DNS to obtain list of peers:": "DNS per la lista dei nodi:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Scaricamento della catena di blocchi in corso, attendere prego (la catena risale a %{days} giorni fa).",
       "download_posts_status": "Scaricati %{portion} messaggi", // Downloaded 10/30 posts
       "Enable": "Attivato",
@@ -2058,7 +2109,10 @@ if(preferredLanguage == "it"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -2098,6 +2152,7 @@ if(preferredLanguage == "fr"){
       "Configure block generation": "Configuration de la production de blocs",
       "Connections:": "Connexions: ", // to network
       "Connection lost.": "Connexion perdue.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} jour |||| %{smart_count} jours",
       "Detailed information": "Informations détaillées",
       "DHT network down.": "Panne du réseau DHT.",
@@ -2105,11 +2160,16 @@ if(preferredLanguage == "fr"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Messages privés avec %{username}",
       "Disable": "Désactiver",
       "display_mentions": "Afficher les mentions",
       "Display retransmissions": "Afficher les retransmissions",
       "DNS to obtain list of peers:": "DNS où obtenir une liste des pairs:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Téléchargement de la chaîne de blocs, veuillez patienter avant de continuer (la chaîne de blocs a %{days} jours de retard).",
       "download_posts_status": "%{portion} billets téléchargés", // Downloaded 10/30 posts
       "Enable": "Activer",
@@ -2396,8 +2456,10 @@ if(preferredLanguage == "fr"){
       "No favs here because you are not logged in." : "No favs here because you are not logged in.",
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
-      "You have to log in to favorite messages.": "You have to log in to favorite messages."
-
+      "You have to log in to favorite messages.": "You have to log in to favorite messages.",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -2439,6 +2501,7 @@ if(preferredLanguage == "ru"){
        "Configure block generation": "Настройка майнинга",
        "Connections:": "Соединений: ",
        "Connection lost.": "Соединение с сетью было потеряно.",
+       "daemon_is_obsolete": "твистер демон устарел, необходима версия %{versionReq} или выше",
        "days": "%{smart_count} день |||| %{smart_count} дней",
        "Detailed information": "Подробная информация",
        "DHT network down.": "Недоступна DHT сеть.",
@@ -2446,11 +2509,16 @@ if(preferredLanguage == "ru"){
        "Group Messages": "Групповые сообщения",
        "Group Messages — New Group Creation": "Групповые сообщения — Создать новую группу",
        "Group Messages — Join Group": "Групповые сообщения — Присоединиться к группе",
+       "group_key_cant_import": "невозможно импортировать ключ ЛС группы",
+       "group_key_is_invalid_perhaps": "возможно, неправильный ключ",
+       "group_key_was_imported": "Ключ для ЛС группы %{alias} импортирован.\n"
+         + "Её сообщения будут подгружены в скором времени.",
        "direct_messages_with": "Личная переписка с %{username}",
        "Disable": "Отключено",
        "display_mentions": "Показать упоминания",
        "Display retransmissions": "Показать репосты",
        "DNS to obtain list of peers:": "DNS адрес для получения пиров:",
+       "do_not_show_it_again": "не показывать больше",
        "downloading_block_chain": "Загрузка цепочки блоков, пожалуйста подождите, (Цепочка блоков устарела на %{days} дней).",
        "download_posts_status": "Загружено %{portion} постов", // Downloaded 10/30 posts
        "Enable": "Включено",
@@ -2742,7 +2810,10 @@ if(preferredLanguage == "ru"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -2782,6 +2853,7 @@ if(preferredLanguage == "de"){
       "Configure block generation": "Block-Generierung einstellen",
       "Connections:": "Verbindungen: ", // to network
       "Connection lost.": "Verbindung verloren.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} Tag |||| %{smart_count} Tage",
       "Detailed information": "Detaillierte Informationen",
       "DHT network down.": "DHT-Netzwerk nicht verfügbar.",
@@ -2789,11 +2861,16 @@ if(preferredLanguage == "de"){
       "Group Messages": "Gruppennachrichten",
       "Group Messages — New Group Creation": "Gruppennachrichten — Neue Gruppe erstellen",
       "Group Messages — Join Group": "Gruppennachrichten — Gruppe beitreten",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direktnachrichten mit %{username}",
       "Disable": "Deaktivieren",
       "display_mentions": "Zeige Erwähnungen", // Ist das richtig? Ich weiß nicht, in welchem Zusammenhang das benutzt wird.
       "Display retransmissions": "Weiterleitungen anzeigen",
       "DNS to obtain list of peers:": "DNS um Peer-Liste abzurufen:",
+      "do_not_show_it_again": "don't show it again",
       "dns address": "DNS-Adresse",
       "downloading_block_chain": "Block-Chain wird heruntergeladen, bitte warten (Block-Chain ist %{days} Tage alt).",
       "download_posts_status": "%{portion} Posts heruntergeladen", // Downloaded 10/30 posts
@@ -3083,7 +3160,10 @@ if(preferredLanguage == "de"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -3123,6 +3203,7 @@ if(preferredLanguage == "ja"){
       "Configure block generation": "ブロック生成の設定",
       "Connections:": "接続数: ", // to network
       "Connection lost.": "切断されました。",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count}日 |||| %{smart_count}日",
       "Detailed information": "詳細",
       "DHT network down.": "DHTネットワークがダウンしています",
@@ -3130,11 +3211,16 @@ if(preferredLanguage == "ja"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "停止",
       "display_mentions": "メンションを表示する",
       "Display retransmissions": "リトランスミットを表示する",
       "DNS to obtain list of peers:": "ピア取得用のDNS:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "ブロックチェインをダウンロードしています。しばらくお待ちください。（ブロックチェーンは%{days}日送れています）",
       "download_posts_status": "ダウンロード済みの投稿 %{portion}", // Downloaded 10/30 posts
       "Enable": "有効",
@@ -3419,7 +3505,10 @@ if(preferredLanguage == "ja"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -3460,6 +3549,7 @@ if(preferredLanguage == "pt-BR"){
       "Configure block generation": "Configurar a geração de blocos",
       "Connections:": "Conexões: ", // to network
       "Connection lost.": "Conexão perdida.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} dia |||| %{smart_count} dias",
       "Detailed information": "Informações detalhadas",
       "DHT network down.": "Falha na rede DHT",
@@ -3467,11 +3557,16 @@ if(preferredLanguage == "pt-BR"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Mensagens Diretas com %{username}",
       "Disable": "Desabilitado",
       "display_mentions": "Exibir menções",
       "Display retransmissions": "Exibir retransmissões",
       "DNS to obtain list of peers:": "DNS para obter a lista de nós:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Baixando a Cadeia de Blocos, por favor aguarde (A Cadeia de Blocos está %{days} dias desatualizada).",
       "download_posts_status": "%{portion} postagens carregadas.", // Downloaded 10/30 posts
       "Enable": "Habilitado",
@@ -3761,7 +3856,10 @@ if(preferredLanguage == "pt-BR"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
@@ -3784,7 +3882,7 @@ if(preferredLanguage == "tr"){
       "busted_avowal": "Şüpheli bir şeyler iliştirmeye çalışırken enselendim.",
       "btn_ok": "Tamam",
       "Cancel": "İptal",
-      "clear_cache": "Clear cache",
+      "clear_cache": "Geçmişi temizle",
       "Confirm": "Onayla",
       "сonfirm_group_leaving_header": "Gruptan ayrılmayı onayla",
       "сonfirm_group_leaving_body": "%{alias} grubundan ayrılmak istiyor musun?",
@@ -3793,14 +3891,15 @@ if(preferredLanguage == "tr"){
             "Eğer bu sayfada kalırsanız eylemlerinizi işlemeyebilir.\n" +
             "Bunun yerine [Ağ Durumu sayfasını](%{page}) kontrol etmek ister misiniz?",
       "confirm_terminate_daemon": "Hizmeti sonlandırmak istiyor musun?\nTwister istemcisi çalışmayacak.",
-      "confirm_unfollow_@": "Are you sure you want to unfollow @%{alias}?",
-      "confirm_uri_shortener_clear_cache": "Are you sure you want to clear browser cache of shortened URIs?",
+      "confirm_unfollow_@": "@%{alias} kullanıcısını takip etmeyi bırakmak istiyor musun?",
+      "confirm_uri_shortener_clear_cache": "Kısaltılmış adres geçimişini temizlemek istiyor musun?",
       "Change user": "Kullanıcı değiştir",
       "Checking...": "Denetleniyor...", // checking if username is available
       "Collapse": "Kapat", // smaller view of a post
       "Configure block generation": "Blok üretim ayarları",
       "Connections:": "Bağlantılar: ", // to network
       "Connection lost.": "Bağlantı koptu.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} gün |||| %{smart_count} gün",
       "Detailed information": "Detaylı bilgi",
       "DHT network down.": "DHT ağı çalışmıyor.",
@@ -3808,11 +3907,16 @@ if(preferredLanguage == "tr"){
       "Group Messages": "Grup Mesajları",
       "Group Messages — New Group Creation": "Grup Mesajları — Yeni Grup Oluştur",
       "Group Messages — Join Group": "Grup Mesajları — Gruba katıl",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "%{username} ile Direk Mesajlar",
       "Disable": "Kullanılmaz",
       "display_mentions": "Bahsedenleri göster",
       "Display retransmissions": "Tekrar iletimleri göster",
       "DNS to obtain list of peers:": "Eş listesini almak için DNS:",
+      "do_not_show_it_again": "bir daha gösterme",
       "downloading_block_chain": "Blok zinciri indiriliyor, devam edebilmek için lütfen bekleyiniz (blok zinciri %{days} günlük).",
       "download_posts_status": "Göderilerin indirilme oranı: %{portion}", // Downloaded 10/30 posts
       "Enable": "Kullanılabilir",
@@ -3916,7 +4020,7 @@ if(preferredLanguage == "tr"){
         + "Not: URL kısaltma işlemi tam URL'i barındıran 'boş' bir twist oluşturacak.\n"
         + "Bu özel twist görüntülenmeyecek, fakat gönderi sayınızda hesaba katılacak.",
       "shorten_URI_its_public_is_it_ok": "Your link will be public available! Are you OK with that?",
-      "URI_shortener": "URI Shortener",
+      "URI_shortener": "Adres kısalt",
       "The File APIs are not fully supported in this browser.": "Dosya API'si tarayıcınızda tam olarak desteklenmiyor.",
       "time_ago": "%{time} önce", // 5 minutes ago
       "Time of the last block:": "Son blok saati: ",
@@ -4099,7 +4203,10 @@ if(preferredLanguage == "tr"){
       "users_favs": "@%{username} kullanıcısının favorileri",
       "Favorites": "Favoriler",
       "You have to log in to favorite messages.": "İletileri favorine eklemek için giriş yapmalısın.",
-      "fav_this": "Sana özel mi?"
+      "fav_this": "Sana özel mi?",
+      "Last activity": "Son etkinlik",
+      "New Users": "Yeni Kullanıcılar",
+      "Live tracking" : "Canlı takip"
     };
 }
 
@@ -4139,6 +4246,7 @@ if(preferredLanguage == "cs"){
       "Configure block generation": "Nastavení generace bloků",
       "Connections:": "Připojení: ", // to network
       "Connection lost.": "Žádné připojení do sítě.",
+      "daemon_is_obsolete": "twister daemon is obsolete, version %{versionReq} or higher is required",
       "days": "%{smart_count} dnem |||| %{smart_count} dny |||| %{smart_count} dny",
       "Detailed information": "Podrobné informace",
       "DHT network down.": "Síť DHT je nedostupná.",
@@ -4146,11 +4254,16 @@ if(preferredLanguage == "cs"){
       "Group Messages": "Group Messages",
       "Group Messages — New Group Creation": "Group Messages — New Group Creation",
       "Group Messages — Join Group": "Group Messages — Join Group",
+      "group_key_cant_import": "Can\'t import DM group key",
+      "group_key_is_invalid_perhaps": "perhaps the key is invalid",
+      "group_key_was_imported": "Key for DM group %{alias} was imported.\n"
+        + "Its messages will be fetched soon.",
       "direct_messages_with": "Direct messages with %{username}",
       "Disable": "Vypnuto",
       "display_mentions": "Zobrazit zmínky",
       "Display retransmissions": "Zobrazit přeposlané",
       "DNS to obtain list of peers:": "DNS pro načtení seznamu uzlů:",
+      "do_not_show_it_again": "don't show it again",
       "downloading_block_chain": "Stahuji blockchain, prosím počkejte (blockchain je %{days} dnů starý).",
       "download_posts_status": "Staženo %{portion} příspěvků", // Downloaded 10/30 posts
       "Enable": "Zapnuto",
@@ -4440,7 +4553,10 @@ if(preferredLanguage == "cs"){
       "users_favs": "Favorites of @%{username}",
       "Favorites": "Favorites",
       "You have to log in to favorite messages.": "You have to log in to favorite messages.",
-      "fav_this": "Is it for you only?"
+      "fav_this": "Is it for you only?",
+      "Last activity": "Last activity",
+        "New Users": "New Users",
+        "Live tracking" : "Live tracking"
     };
 }
 
